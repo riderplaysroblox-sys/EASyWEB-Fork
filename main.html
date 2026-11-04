@@ -8,7 +8,7 @@
 *{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}html,body{overflow-x:clip;overscroll-behavior-x:none}#cv{touch-action:pan-y pinch-zoom}
 html,body{margin:0;background:#000;color:var(--ink);font-family:"Times New Roman",Times,serif}
 .app{display:grid;grid-template-columns:1fr clamp(300px,25vw,440px);min-height:100vh}
-.stage{display:flex;align-items:center;justify-content:center;background:#000;padding:8px;position:relative;overflow:hidden;isolation:isolate}.stage #ytPlayer{position:absolute;left:0;top:0;width:0;height:0;border:0;z-index:0;background:#000;display:none}
+.stage{display:flex;align-items:center;justify-content:center;background:#000;padding:8px;position:relative;overflow:hidden;isolation:isolate}.stage #ytPlayer{position:absolute;left:0;top:0;width:0;height:0;border:0;z-index:2;background:#000;display:none}
 #cv{width:1440px;max-width:100%;aspect-ratio:4/3;height:auto;background:transparent;display:block;position:relative;z-index:1}
 .side{min-width:0;overflow-x:hidden;background:var(--side);border-left:4px solid var(--red);box-shadow:-6px 0 14px rgba(224,32,15,.45);padding:22px 20px 14px;display:flex;flex-direction:column;gap:20px;min-height:100vh}
 .logo{margin:0;text-align:center;font-weight:400;font-size:clamp(40px,3.6vw,56px);line-height:1}
@@ -618,7 +618,7 @@ function lumaSmear(src,dst){
 function frame(now){g.setTransform(1,0,0,1,0,0);if(ytActive)g.clearRect(0,0,RW,RH);else{g.fillStyle="#000";g.fillRect(0,0,RW,RH);}const K=Math.min(RW/640,RH/480),KX=widescreenMode?RW/640:K,KY=widescreenMode?RH/480:K;g.setTransform(KX,0,0,KY,(RW-640*KX)/2,(RH-480*KY)/2);if(!cur&&dispQ.length)activate(dispQ.shift());
  if(!cgen&&cur&&cur.endAt==null&&now>cur.until)cur=null;
  if(holdOn){if(cur||dispQ.length||playQ.length||playingA)blackUntil=null;else if(!blackOn)holdEnd();else if(blackUntil==null)blackUntil=now+BLACK_HOLD;else if(now>=blackUntil)holdEnd()}
- const ytAlertNow=!!(cur||dispQ.length||playQ.length||playingA||holdOn);if(ytActive)ytSetMute(ytAlertNow);
+ const ytAlertNow=!!(cur||dispQ.length||playQ.length||playingA||holdOn);if(ytActive){ytSetMute(ytAlertNow);ytSetVisible(!ytAlertNow);}
  if(holdOn&&!vidRes&&cur&&now>=cur.t0){vidRes=true;fz=null;if(bgVid)bgVid.play().catch(()=>{})}
  if(holdOn&&!blackOn&&!muteOn&&muteCrawl&&cur&&!cur.unm&&now>=cur.t0){muteOn=true;holdMute()}
  // the tune-to screen always silences the video (even with no tune-to audio loaded); afterwards the normal crawl mute rules apply
@@ -1033,9 +1033,9 @@ function ytSyncFrame(){if(!ytFrame)return;const stage=document.querySelector(".s
 if(window.ResizeObserver){const ytResizeObserver=new ResizeObserver(ytSyncFrame);ytResizeObserver.observe(cv)}
 addEventListener("resize",ytSyncFrame);
 function ytCommand(func){if(!ytFrame||!ytFrame.contentWindow)return;try{ytFrame.contentWindow.postMessage(JSON.stringify({event:"command",func,args:[]}),"*")}catch(e){}}
-function ytSetMute(m){if(ytMuted===m)return;ytMuted=m;ytCommand(m?"mute":"unMute")}
+function ytSetMute(m){if(ytMuted===m)return;ytMuted=m;ytCommand(m?"mute":"unMute")}\nfunction ytSetVisible(visible){if(ytFrame)ytFrame.style.display=visible?"block":"none"}
 function ytVideoId(raw){const v=raw.trim();if(/^[\w-]{11}$/.test(v))return v;try{const u=new URL(v);let id=u.searchParams.get("v");if(!id&&/youtu\.be$/i.test(u.hostname))id=u.pathname.split("/").filter(Boolean)[0];if(!id&&/youtube\.com$/i.test(u.hostname))id=u.pathname.split("/").filter(Boolean).find(x=>["embed","shorts","live"].includes(u.pathname.split("/").filter(Boolean)[0]))&&u.pathname.split("/").filter(Boolean)[1];return /^[\w-]{11}$/.test(id||"")?id:null}catch(e){return null}}
-function ytLoad(){const id=ytVideoId($("#ytUrl").value);if(!id)return setNote("ENTER A VALID YOUTUBE URL");const stage=document.querySelector(".stage");if(ytFrame){ytFrame.remove();ytFrame=null}ytFrame=document.createElement("iframe");ytFrame.id="ytPlayer";ytFrame.title="YouTube background video";ytFrame.allow="autoplay; encrypted-media; picture-in-picture";ytFrame.allowFullscreen=true;ytFrame.style.display="block";ytFrame.onload=()=>{ytMuted=null;ytSyncFrame();ytSetMute(!!(cur||dispQ.length||playQ.length||playingA||holdOn))};ytFrame.src="https://www.youtube-nocookie.com/embed/"+id+"?autoplay=1&mute=1&controls=1&enablejsapi=1&playsinline=1&origin="+encodeURIComponent(location.origin);stage.insertBefore(ytFrame,stage.firstChild);ytActive=true;cv.style.pointerEvents="none";ytMuted=null;ytSyncFrame();setNote("YOUTUBE VIDEO LOADED — PRESS PLAY IF NEEDED")}
+function ytLoad(){const id=ytVideoId($("#ytUrl").value);if(!id)return setNote("ENTER A VALID YOUTUBE URL");const stage=document.querySelector(".stage");if(ytFrame){ytFrame.remove();ytFrame=null}ytFrame=document.createElement("iframe");ytFrame.id="ytPlayer";ytFrame.title="YouTube background video";ytFrame.allow="autoplay; encrypted-media; picture-in-picture";ytFrame.allowFullscreen=true;ytFrame.style.display="block";ytFrame.onload=()=>{ytMuted=null;ytSyncFrame();const alertNow=!!(cur||dispQ.length||playQ.length||playingA||holdOn);ytSetMute(alertNow);ytSetVisible(!alertNow)};ytFrame.src="https://www.youtube-nocookie.com/embed/"+id+"?autoplay=1&mute=1&controls=1&enablejsapi=1&playsinline=1&origin="+encodeURIComponent(location.origin);stage.insertBefore(ytFrame,stage.firstChild);ytActive=true;cv.style.pointerEvents="none";ytMuted=null;ytSyncFrame();const alertNow=!!(cur||dispQ.length||playQ.length||playingA||holdOn);ytSetMute(alertNow);ytSetVisible(!alertNow);setNote("YOUTUBE VIDEO LOADED — PRESS PLAY IF NEEDED")}
 $("#ytLoad").onclick=ytLoad;
 $("#ytUrl").onkeydown=e=>{if(e.key==="Enter")ytLoad()};
 $("#ytClear").onclick=()=>{if(ytFrame){ytFrame.src="about:blank";ytFrame.remove();ytFrame=null}ytActive=false;ytMuted=null;cv.style.pointerEvents="auto";setNote("YOUTUBE VIDEO CLEARED")};
