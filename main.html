@@ -47,6 +47,7 @@ input[type=text],input[type=number]{flex:1;min-width:0;height:46px;background:#0
 .mb{min-height:78px;text-align:left;padding:10px 16px;font-size:24px;background:linear-gradient(var(--btn1),var(--btn2));border:0;border-right:3px solid #aaa;border-bottom:3px solid #888;border-radius:2px;cursor:pointer}
 .mb small{display:block;font-size:14px;color:#bbb;margin-top:2px}.mb:active{filter:brightness(.8)}
 .g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+.yt-controls .row input{flex:1;min-width:0;width:auto}.yt-controls .row button{flex:0 0 auto}
 .row>input,.row>select{width:0}
 .app:not([data-scr=imp]) .g-imp,.app:not([data-scr=str]) .g-str,.app:not([data-scr=url]) .g-url{display:none}
 select{flex:1;min-width:0;height:46px;background:#000;color:var(--ink);font:inherit;font-size:14px;border:2px solid var(--red);border-radius:8px;padding:0 8px}
@@ -125,7 +126,7 @@ The fans for enjoying!</p>
 <div class="row"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="pvo" checked=""> Pause video 3 s on alert (Full Page)</label></div>
 <div class="row"><button class="bv" id="bi">Import image</button><input type="text" id="fi" readonly="" aria-label="Background image (PNG or JPEG)"><button class="bs" id="ci">Clear</button></div>
 <div class="row"><button class="bv" id="bvd">Import video</button><input type="text" id="fv" readonly="" aria-label="Background video"><button class="bs" id="cvd">Clear</button></div>
-<div class="row"><input type="text" id="ytUrl" placeholder="YouTube video URL or ID" aria-label="YouTube video URL"><button class="bv" id="ytLoad">Load YouTube</button><button class="bs" id="ytClear">Clear</button></div>
+
 <div class="row"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="tuo"> Tune-to screen, channel</label><input type="number" id="tuc" min="0" max="99" step="1" value="2" inputmode="numeric" style="flex:none;width:80px" aria-label="Tune-to channel number, 0 to 99"></div>
 <div class="row"><button class="bv" id="tub">Tune audio</button><input type="text" id="tuf" readonly="" aria-label="Optional tune-to audio file" placeholder="optional audio (3 s if none)"><button class="bs" id="tux">Clear</button></div>
 <input type="file" id="ftu" accept="audio/*" hidden="">
